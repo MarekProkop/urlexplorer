@@ -1,3 +1,7 @@
+# Input is always a character vector. All functions return a tibble with a
+# number of rows equal to the length of the input vector, and each column
+# corresponds to a component of the input.
+
 #' Split URL into its constituent parts
 #'
 #' @param url A character vector of URLs to be split.
@@ -42,9 +46,11 @@ split_host <- function(host) {
 #' Split path into segments
 #'
 #' @param path A character vector of paths to be split.
+#'
 #' @return A tibble with one row per path and columns for each segment separated
 #'   by '/'.
 #' @export
+#'
 #' @examples
 #' split_path(c("/path/to/resource"))
 split_path <- function(path) {
@@ -56,9 +62,11 @@ split_path <- function(path) {
 #' Split query into parameters
 #'
 #' @param query A character vector of query strings to be split.
+#'
 #' @return A tibble with one row per query string and columns for each
 #'   parameter, column names as parameter names.
 #' @export
+#'
 #' @examples
 #' split_query(c("param1=value1&param2=value2"))
 split_query <- function(query) {

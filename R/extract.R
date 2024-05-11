@@ -1,8 +1,14 @@
+# Input is always a character vector. All functions return a character vector of
+# the same length as the input vector, containing the extracted component or
+# value.
+
 #' Extract the scheme from URL
 #'
 #' @param url A character vector of URLs.
+#'
 #' @return A character vector containing the scheme from each URL.
 #' @export
+#'
 #' @examples
 #' extract_scheme(c("http://example.com", "https://example.com"))
 extract_scheme <- function(url) {
@@ -12,8 +18,10 @@ extract_scheme <- function(url) {
 #' Extract userinfo from URL
 #'
 #' @param url A character vector of URLs.
+#'
 #' @return A character vector containing the userinfo from each URL, if present.
 #' @export
+#'
 #' @examples
 #' extract_userinfo(c("user:pass@example.com"))
 extract_userinfo <- function(url) {
@@ -34,9 +42,11 @@ extract_host <- function(url) {
 #' Extract the port number from URL
 #'
 #' @param url A character vector of URLs.
+#'
 #' @return A character vector containing the port number from each URL, if
 #'   specified.
 #' @export
+#'
 #' @examples
 #' extract_port(c("http://example.com:8080"))
 extract_port <- function(url) {
@@ -71,8 +81,10 @@ extract_query <- function(url) {
 #' Extract the fragment from URL
 #'
 #' @param url A character vector of URLs.
+#'
 #' @return A character vector containing the fragment from each URL, if present.
 #' @export
+#'
 #' @examples
 #' extract_fragment(c("http://example.com/#sec1", "http://example.com/#sec2"))
 extract_fragment <- function(url) {
@@ -83,8 +95,10 @@ extract_fragment <- function(url) {
 #'
 #' @param path A character vector of paths.
 #' @param segment_index The index of the segment to extract.
+#'
 #' @return A character vector containing the specified segment from each path.
 #' @export
+#'
 #' @examples
 #' extract_path_segment(c("/path/to/resource", "/another/path/"), 2)
 extract_path_segment <- function(path, segment_index) {
@@ -95,9 +109,11 @@ extract_path_segment <- function(path, segment_index) {
 #'
 #' @param query A character vector of query strings.
 #' @param param_name The name of the parameter to extract values for.
+#'
 #' @return A character vector containing the value of the specified parameter
 #'   from each query string.
 #' @export
+#'
 #' @examples
 #' extract_param_value(c("param1=val1&param2=val2", "param1=val3"), "param1")
 extract_param_value <- function(query, param_name) {
@@ -112,10 +128,12 @@ extract_param_value <- function(query, param_name) {
 #'
 #' @param url A character vector of URLs or paths from which to extract file
 #'   extensions.
+#'
 #' @return A character vector with the file extension for each URL or path.
 #'   Extensions are returned without the dot (e.g., "jpg" instead of ".jpg"),
 #'   and URLs or paths without extensions will return `NA`.
 #' @export
+#'
 #' @examples
 #' extract_file_extension(
 #'   c(

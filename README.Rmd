@@ -1,0 +1,170 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# urlexplorer
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of urlexplorer is to assist you with structural analysis and pattern discovery within datasets of URLs. It provides tools for parsing URLs into their constituent components and analyzing these components to uncover insights into web site architecture and search engine optimizations (SEO).
+
+## Installation
+
+You can install the development version of urlexplorer from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("MarekProkop/urlexplorer")
+```
+
+## Functions
+
+`urlexplorer` provides a toolkit for URL analysis structured around three verbs: **split**, **extract**, and **count**.
+
+### Split
+
+These functions decompose a URL into its constituent components. Input is a character vector, and each function returns a tibble with a number of rows equal to the length of the input vector. Each column corresponds to a component of the input.
+
+- `split_url(url)`: Splits a URL into scheme, host, path, query, and fragment.
+- `split_host(host)`: Separates the host into subdomains, domain, and top-level domain.
+- `split_path(path)`: Divides the path into its individual segments.
+- `split_query(query)`: Splits the query string into its parameters, with each parameter as a column.
+
+### Extract
+
+These functions are designed to retrieve specific components from a URL. Input is always a character vector, and the output is a character vector of the extracted component, matching the length of the input vector. If any component is missing, the function returns `NA`.
+
+- `extract_scheme(url)`: Extracts the URL scheme.
+- `extract_userinfo(url)`: Retrieves userinfo component of the URL.
+- `extract_host(url)`: Pulls the host component from the URL.
+- `extract_port(url)`: Gets the port number from the URL.
+- `extract_path(url)`: Extracts the path component.
+- `extract_query(url)`: Retrieves the entire query string.
+- `extract_fragment(url)`: Extracts the fragment portion of the URL.
+- `extract_path_segment(path, segment_index)`: Extracts a specific segment of the path.
+- `extract_param_value(query, param_name)`: Retrieves the value of a specified query parameter.
+- `extract_file_extension(url)`: Extracts the file extension from the URL path.
+
+### Count
+
+These functions count occurrences of various URL components or attributes, useful for quantitative analysis. Input is a character vector, and the output is a tibble listing each component or attribute with its count.
+
+- `count_schemes(url)`: Counts the different schemes used in URLs.
+- `count_userinfos(url)`: Tally of userinfo components.
+- `count_hosts(url)`: Quantifies frequency of different hosts.
+- `count_ports(url)`: Counts different port numbers used.
+- `count_paths(url)`: Measures the occurrence of various paths.
+- `count_queries(url)`: Counts the queries across URLs.
+- `count_fragments(url)`: Tallies the fragments used in URLs.
+- `count_path_segments(path, segment_index)`: Counts specific path segments.
+- `count_param_names(query)`: Counts different parameter names in query strings.
+- `count_param_values(query, param_name)`: Counts occurrences of values for a specific parameter.
+
+
+## Examples
+
+This is a basic examples which shows you how to solve a common problem.
+
+### Declare libraries and sample data
+
+```{r library, include=FALSE}
+library(urlexplorer)
+library(tidyverse)
+```
+
+```{r sample_data}
+# Sample dataset included in the package
+
+data(websitepages)
+websitepages |> 
+  slice_head(n = 10)
+```
+
+### Split URLs into components
+
+```{r split_url}
+websitepages$page |> 
+  split_url() |> 
+  slice_head(n = 10)
+```
+
+### Split hosts into subdomains, domain, and top-level domain
+
+```{r split_host}
+websitepages$page |> 
+  extract_host() |>
+  split_host() |> 
+  slice_head(n = 10)
+```
+
+### Split paths into segments
+
+```{r split_path}
+websitepages$page |> 
+  extract_path() |>
+  split_path() |> 
+  slice_head(n = 10)
+```
+
+### Get a frequency table of hosts
+
+```{r count_hosts}
+websitepages$page |> 
+  count_hosts(sort = TRUE)
+```
+
+### Filter by host and count path segments
+
+Identify the most common path 1st segments for a specific host.
+
+```{r count_path_segments}
+websitepages |>
+  filter(extract_host(page) == "www.example.com") |>
+  pull(page) |>
+  extract_path() |>
+  count_path_segments(segment_index = 1) |> 
+  slice_max(order_by = n, n = 5)
+```
+
+### Frequency table of parametter names
+
+#### Create a simple frequency table of query parameters
+
+```{r count_param_names}
+websitepages$page |>
+  extract_query() |>
+  count_param_names(sort = TRUE)
+```
+
+#### Add sample values for each parameter
+
+A little bit more complex example: extract query parameters, count the frequency of each parameter name, and provide a sample of values for each parameter.
+
+```{r}
+websitepages$page |>
+  extract_query() |>
+  split_query() |>
+  pivot_longer(dplyr::everything()) |>
+  drop_na(value) |>
+  summarise(
+    n = n(),
+    values = unique(value) |>
+      paste(collapse = ", ") |>
+      str_trunc(40),
+    .by = name
+  ) |>
+  arrange(desc(n))
+```
+

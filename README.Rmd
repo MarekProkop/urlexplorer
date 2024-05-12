@@ -79,7 +79,7 @@ This is a basic examples which shows you how to solve a common problem.
 
 ### Declare libraries and sample data
 
-```{r library, include=FALSE}
+```{r library}
 library(urlexplorer)
 library(tidyverse)
 ```

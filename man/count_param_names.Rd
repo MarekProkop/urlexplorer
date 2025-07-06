@@ -12,7 +12,7 @@ count_param_names(query, sort = FALSE, name = "n")
 \item{sort}{Logical indicating whether to sort the output by count. Defaults
 to FALSE.}
 
-\item{name}{The name of the column containing the counts. Deafults to 'n'.}
+\item{name}{The name of the column containing the counts. Defaults to 'n'.}
 }
 \value{
 A tibble with each parameter name and how often it occurs.

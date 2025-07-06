@@ -55,17 +55,32 @@ test_that("split_url() handles malformed URLs", {
   url <- "http:///example.com"
   result <- split_url(url)
   expected <- tibble::tibble(
-    scheme = "http",
+    scheme = NA_character_,
     host = NA_character_,
-    port = -1,
+    port = NA_integer_,
     userinfo = NA_character_,
-    path = "/example.com",
+    path = NA_character_,
     query = NA_character_,
     fragment = NA_character_
   )
   expect_equal(result, expected)
 })
 
+# Test a URL with diacritics in th path, query or fragment
+test_that("split_url() handles diacritics in the URL", {
+  url <- "https://example.com/česky?česky=česky#česky"
+  result <- split_url(url)
+  expected <- tibble::tibble(
+    scheme = "https",
+    host = "example.com",
+    port = NA_integer_,
+    userinfo = NA_character_,
+    path = "/česky",
+    query = "česky=česky",
+    fragment = "česky"
+  )
+  expect_equal(result, expected)
+})
 
 # split_host() tests ------------------------------------------------------
 

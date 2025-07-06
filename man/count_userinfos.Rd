@@ -12,7 +12,7 @@ count_userinfos(url, sort = FALSE, name = "n")
 \item{sort}{Logical indicating whether to sort the output by count. Defaults
 to FALSE.}
 
-\item{name}{The name of the column containing the counts. Deafults to 'n'.}
+\item{name}{The name of the column containing the counts. Defaults to 'n'.}
 }
 \value{
 A tibble listing userinfos and how often each occurs.
@@ -21,5 +21,5 @@ A tibble listing userinfos and how often each occurs.
 Count occurrences of userinfo in URLs
 }
 \examples{
-count_userinfos(c("user:pass@example.com", "example.com"))
+count_userinfos(c("http://user:pass@example.com", "http://example.com"))
 }

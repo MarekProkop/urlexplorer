@@ -2,6 +2,15 @@
 # the same length as the input vector, containing the extracted component or
 # value.
 
+# Internal regex patterns for URL components
+.url_scheme_pattern <- "^(https?)"
+.url_userinfo_pattern <- "://([^@/]+)@"
+.url_host_pattern <- "://(?:[^@/]+@)?([^:/]+)"
+.url_port_pattern <- "://[^/]+:(\\d+)"
+.url_path_pattern <- "://[^/]+(/[^?#]*)"
+.url_query_pattern <- "\\?([^#]*)"
+.url_fragment_pattern <- "#(.*)"
+
 #' Extract the scheme from URL
 #'
 #' @param url A character vector of URLs.
@@ -12,7 +21,8 @@
 #' @examples
 #' extract_scheme(c("http://example.com", "https://example.com"))
 extract_scheme <- function(url) {
-  split_url(url)$scheme
+  # Fast direct scheme extraction using regex
+  stringr::str_extract(url, .url_scheme_pattern, group = 1)
 }
 
 #' Extract userinfo from URL
@@ -23,9 +33,10 @@ extract_scheme <- function(url) {
 #' @export
 #'
 #' @examples
-#' extract_userinfo(c("user:pass@example.com"))
+#' extract_userinfo(c("http://user:pass@example.com"))
 extract_userinfo <- function(url) {
-  split_url(url)$userinfo
+  # Fast direct userinfo extraction using regex
+  stringr::str_extract(url, .url_userinfo_pattern, group = 1)
 }
 
 #' Extract the host from URL
@@ -36,7 +47,8 @@ extract_userinfo <- function(url) {
 #' @examples
 #' extract_host(c("https://example.com", "http://www.example.com"))
 extract_host <- function(url) {
-  split_url(url)$host
+  # Fast direct host extraction using regex
+  stringr::str_extract(url, .url_host_pattern, group = 1)
 }
 
 #' Extract the port number from URL
@@ -50,7 +62,9 @@ extract_host <- function(url) {
 #' @examples
 #' extract_port(c("http://example.com:8080"))
 extract_port <- function(url) {
-  split_url(url)$port
+  # Fast direct port extraction using regex
+  port_str <- stringr::str_extract(url, .url_port_pattern, group = 1)
+  as.integer(port_str)
 }
 
 #' Extract the path from URL
@@ -61,7 +75,8 @@ extract_port <- function(url) {
 #' @examples
 #' extract_path(c("http://example.com/", "http://example.com/path/to/resource"))
 extract_path <- function(url) {
-  split_url(url)$path
+  # Fast direct path extraction using regex
+  stringr::str_extract(url, .url_path_pattern, group = 1)
 }
 
 #' Extract the query from URL
@@ -75,7 +90,8 @@ extract_path <- function(url) {
 #'   "http://example.com?query1=value3"
 #' ))
 extract_query <- function(url) {
-  split_url(url)$query
+  # Fast direct query extraction using regex
+  stringr::str_extract(url, .url_query_pattern, group = 1)
 }
 
 #' Extract the fragment from URL
@@ -88,7 +104,8 @@ extract_query <- function(url) {
 #' @examples
 #' extract_fragment(c("http://example.com/#sec1", "http://example.com/#sec2"))
 extract_fragment <- function(url) {
-  split_url(url)$fragment
+  # Fast direct fragment extraction using regex
+  stringr::str_extract(url, .url_fragment_pattern, group = 1)
 }
 
 #' Extract a specific segment from a path
@@ -102,7 +119,19 @@ extract_fragment <- function(url) {
 #' @examples
 #' extract_path_segment(c("/path/to/resource", "/another/path/"), 2)
 extract_path_segment <- function(path, segment_index) {
-  split_path(path)[[segment_index]]
+  # Fast direct path segment extraction without calling split_path()
+  # Remove leading slash and split by slash
+  clean_paths <- stringr::str_remove(path, "^/")
+  segments_list <- stringr::str_split(clean_paths, "/", simplify = FALSE)
+  
+  # Extract the specific segment index
+  sapply(segments_list, function(segments) {
+    if (length(segments) >= segment_index && segments[segment_index] != "") {
+      segments[segment_index]
+    } else {
+      NA_character_
+    }
+  })
 }
 
 #' Extract the value of a specified parameter from the query string
@@ -117,7 +146,9 @@ extract_path_segment <- function(path, segment_index) {
 #' @examples
 #' extract_param_value(c("param1=val1&param2=val2", "param1=val3"), "param1")
 extract_param_value <- function(query, param_name) {
-  split_query(query)[[param_name]]
+  # Fast direct regex extraction (same pattern as count_param_values)
+  param_pattern <- paste0("(?:^|&)", stringr::fixed(param_name), "=([^&]*)")
+  stringr::str_extract(query, param_pattern, group = 1)
 }
 
 #' Extract file extension from URLs or paths
@@ -143,5 +174,15 @@ extract_param_value <- function(query, param_name) {
 #'   )
 #' )
 extract_file_extension <- function(url) {
-  stringr::str_extract(extract_path(url), "\\.([^.]+)$", group = 1)
+  # For URLs, extract path first; for paths, use directly
+  paths <- ifelse(
+    stringr::str_detect(url, "^https?://"),
+    extract_path(url),
+    url
+  )
+  
+  # Extract file extension (everything after the last dot in the filename)
+  # Remove query and fragment parts first
+  clean_paths <- stringr::str_remove(paths, "[?#].*$")
+  stringr::str_extract(clean_paths, "\\.([^./]+)$", group = 1)
 }

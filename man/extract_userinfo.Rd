@@ -16,5 +16,5 @@ A character vector containing the userinfo from each URL, if present.
 Extract userinfo from URL
 }
 \examples{
-extract_userinfo(c("user:pass@example.com"))
+extract_userinfo(c("http://user:pass@example.com"))
 }

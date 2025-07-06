@@ -7,7 +7,7 @@
 #' @param url A character vector of URLs.
 #' @param sort Logical indicating whether to sort the output by count. Defaults
 #'   to FALSE.
-#' @param name The name of the column containing the counts. Deafults to 'n'.
+#' @param name The name of the column containing the counts. Defaults to 'n'.
 #'
 #' @return A tibble with each scheme and its count.
 #' @export
@@ -24,13 +24,13 @@ count_schemes <- function(url, sort = FALSE, name = "n") {
 #' @param url A character vector of URLs.
 #' @param sort Logical indicating whether to sort the output by count. Defaults
 #'   to FALSE.
-#' @param name The name of the column containing the counts. Deafults to 'n'.
+#' @param name The name of the column containing the counts. Defaults to 'n'.
 #'
 #' @return A tibble listing userinfos and how often each occurs.
 #' @export
 #'
 #' @examples
-#' count_userinfos(c("user:pass@example.com", "example.com"))
+#' count_userinfos(c("http://user:pass@example.com", "http://example.com"))
 count_userinfos <- function(url, sort = FALSE, name = "n") {
   tibble::tibble(userinfo = extract_userinfo(url)) |>
     dplyr::count(.data$userinfo, sort = sort, name = name)
@@ -41,7 +41,7 @@ count_userinfos <- function(url, sort = FALSE, name = "n") {
 #' @param url A character vector of URLs.
 #' @param sort Logical indicating whether to sort the output by count. Defaults
 #'   to FALSE.
-#' @param name The name of the column containing the counts. Deafults to 'n'.
+#' @param name The name of the column containing the counts. Defaults to 'n'.
 #'
 #' @return A tibble with each host and its count.
 #' @export
@@ -58,7 +58,7 @@ count_hosts <- function(url, sort = FALSE, name = "n") {
 #' @param url A character vector of URLs.
 #' @param sort Logical indicating whether to sort the output by count. Defaults
 #'   to FALSE.
-#' @param name The name of the column containing the counts. Deafults to 'n'.
+#' @param name The name of the column containing the counts. Defaults to 'n'.
 #'
 #' @return A tibble with each port and how many times it occurs.
 #' @export
@@ -75,7 +75,7 @@ count_ports <- function(url, sort = FALSE, name = "n") {
 #' @param url A character vector of URLs.
 #' @param sort Logical indicating whether to sort the output by count. Defaults
 #'   to FALSE.
-#' @param name The name of the column containing the counts. Deafults to 'n'.
+#' @param name The name of the column containing the counts. Defaults to 'n'.
 #'
 #' @return A tibble with each path and its count.
 #' @export
@@ -92,7 +92,7 @@ count_paths <- function(url, sort = FALSE, name = "n") {
 #' @param url A character vector of URLs.
 #' @param sort Logical indicating whether to sort the output by count. Defaults
 #'   to FALSE.
-#' @param name The name of the column containing the counts. Deafults to 'n'.
+#' @param name The name of the column containing the counts. Defaults to 'n'.
 #'
 #' @return A tibble with each query string and how often it occurs.
 #' @export
@@ -109,7 +109,7 @@ count_queries <- function(url, sort = FALSE, name = "n") {
 #' @param url A character vector of URLs.
 #' @param sort Logical indicating whether to sort the output by count. Defaults
 #'   to FALSE.
-#' @param name The name of the column containing the counts. Deafults to 'n'.
+#' @param name The name of the column containing the counts. Defaults to 'n'.
 #'
 #' @return A tibble with each fragment and its count.
 #' @export
@@ -127,7 +127,7 @@ count_fragments <- function(url, sort = FALSE, name = "n") {
 #' @param segment_index Index of the segment to count.
 #' @param sort Logical indicating whether to sort the output by count. Defaults
 #'   to FALSE.
-#' @param name The name of the column containing the counts. Deafults to 'n'.
+#' @param name The name of the column containing the counts. Defaults to 'n'.
 #'
 #' @return A tibble with each segment at the specified index and how often it occurs.
 #' @export
@@ -145,7 +145,7 @@ count_path_segments <- function(path, segment_index, sort = FALSE, name = "n") {
 #' @param param_name The name of the parameter whose values to count.
 #' @param sort Logical indicating whether to sort the output by count. Defaults
 #'   to FALSE.
-#' @param name The name of the column containing the counts. Deafults to 'n'.
+#' @param name The name of the column containing the counts. Defaults to 'n'.
 #'
 #' @return A tibble with each value of the specified parameter and how often it occurs.
 #' @export
@@ -153,7 +153,14 @@ count_path_segments <- function(path, segment_index, sort = FALSE, name = "n") {
 #' @examples
 #' count_param_values(c("param1=value1&param2=value2", "param1=value3"), "param1")
 count_param_values <- function(query, param_name, sort = FALSE, name = "n") {
-  tibble::tibble(param_value = extract_param_value(query, param_name)) |>
+  # Remove NA queries and empty strings
+  clean_query <- query[!is.na(query) & query != ""]
+  
+  # Fast vectorized approach: extract values for specific parameter directly
+  param_pattern <- paste0("(?:^|&)", stringr::fixed(param_name), "=([^&]*)")
+  param_values <- stringr::str_extract(clean_query, param_pattern, group = 1)
+  
+  tibble::tibble(param_value = param_values) |>
     dplyr::count(.data$param_value, sort = sort, name = name)
 }
 
@@ -162,7 +169,7 @@ count_param_values <- function(query, param_name, sort = FALSE, name = "n") {
 #' @param query A character vector of query strings.
 #' @param sort Logical indicating whether to sort the output by count. Defaults
 #'   to FALSE.
-#' @param name The name of the column containing the counts. Deafults to 'n'.
+#' @param name The name of the column containing the counts. Defaults to 'n'.
 #'
 #' @return A tibble with each parameter name and how often it occurs.
 #' @export
@@ -170,8 +177,14 @@ count_param_values <- function(query, param_name, sort = FALSE, name = "n") {
 #' @examples
 #' count_param_names(c("param1=value1&param2=value2", "param3=value3"))
 count_param_names <- function(query, sort = FALSE, name = "n") {
-  split_query(query) |>
-    tidyr::pivot_longer(tidyselect::everything(), names_to = "param_name", values_to = "param_value") |>
-    tidyr::drop_na("param_value") |>
+  # Remove NA queries and empty strings
+  clean_query <- query[!is.na(query) & query != ""]
+  
+  # Fast vectorized approach: split parameters and extract names directly
+  clean_query |>
+    stringr::str_split(pattern = "&") |>
+    unlist() |>
+    stringr::str_split_i(pattern = "=", i = 1) |>
+    (\(x) tibble::tibble(param_name = x))() |>
     dplyr::count(.data$param_name, sort = sort, name = name)
 }

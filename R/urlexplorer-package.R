@@ -3,5 +3,6 @@
 
 ## usethis namespace: start
 #' @importFrom rlang .data
+#' @importFrom utils URLdecode
 ## usethis namespace: end
 NULL

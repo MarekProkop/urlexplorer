@@ -13,10 +13,29 @@
 #' @examples
 #' split_url(c("https://example.com/path?query=arg#frag"))
 split_url <- function(url) {
-  xml2::url_parse(url) |>
-    tibble::as_tibble() |>
-    dplyr::rename(host = "server", userinfo = "user") |>
-    dplyr::mutate(dplyr::across(dplyr::where(is.character), ~ dplyr::na_if(., "")))
+  # URL regex pattern to extract all components
+  # Pattern: scheme://[userinfo@]host[:port][/path][?query][#fragment]
+  # More careful userinfo pattern to avoid matching @ in paths
+  url_pattern <- "^(https?://)(?:([^@/]+)@)?([^:/]+)(?::(\\d+))?(/[^?#]*)?(?:\\?([^#]*))?(?:#(.*))?$"
+  
+  # Extract components using stringr
+  components <- stringr::str_match(url, url_pattern)
+  
+  tibble::tibble(
+    scheme = stringr::str_remove(components[, 2], "://"),
+    host = components[, 4],
+    port = as.integer(components[, 5]),
+    userinfo = components[, 3],
+    path = components[, 6],
+    query = components[, 7],
+    fragment = components[, 8]
+  ) |>
+    dplyr::mutate(
+      # URL decode path and fragment for common encoded characters
+      path = ifelse(!is.na(.data$path), URLdecode(.data$path), .data$path),
+      fragment = ifelse(!is.na(.data$fragment), URLdecode(.data$fragment), .data$fragment),
+      dplyr::across(dplyr::where(is.character), ~ dplyr::na_if(., ""))
+    )
 }
 
 #' Split host into subdomains and domain
@@ -70,7 +89,32 @@ split_path <- function(path) {
 #' @examples
 #' split_query(c("param1=value1&param2=value2"))
 split_query <- function(query) {
-  paste0("?", query) |>
-    urltools::param_get() |>
-    tibble::as_tibble()
+  # Handle NA and empty queries
+  if (all(is.na(query) | query == "")) {
+    return(tibble::tibble(.rows = length(query)))
+  }
+  
+  # Clean query strings
+  query_clean <- stringr::str_remove(query, "^\\?")  # Remove leading ? if present
+  query_clean[is.na(query)] <- NA_character_  # Preserve NAs
+  
+  # Get all unique parameter names efficiently
+  all_param_names <- query_clean[!is.na(query_clean) & query_clean != ""] |>
+    stringr::str_split("&") |>
+    unlist() |>
+    stringr::str_extract("^[^=]+") |>
+    (\(x) x[!is.na(x)])() |>
+    unique() |>
+    sort()
+  
+  # Create result tibble with one row per query
+  result <- tibble::tibble(.rows = length(query))
+  
+  # Extract values for each parameter using vectorized operations
+  for (param_name in all_param_names) {
+    param_pattern <- paste0("(?:^|&)", stringr::fixed(param_name), "=([^&]*)")
+    result[[param_name]] <- stringr::str_extract(query_clean, param_pattern, group = 1)
+  }
+  
+  result
 }

@@ -28,9 +28,12 @@ test_that("extract_userinfo() returns a character vector with the userinfo", {
 # Test that the function returns a character vector with the host
 
 test_that("extract_host() returns a character vector with the host", {
-  url <- c("https://example.com", "http://www.example.com")
+  url <- c(
+    "https://example.com", "http://www.example.com",
+    "https://www.example.com/The-Smart-Factory-@-Wichita.jpg"
+  )
   result <- extract_host(url)
-  expected <- c("example.com", "www.example.com")
+  expected <- c("example.com", "www.example.com", "www.example.com")
   expect_equal(result, expected)
 })
 

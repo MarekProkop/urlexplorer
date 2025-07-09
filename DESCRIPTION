@@ -3,7 +3,7 @@ Title: Structural Analysis and Pattern Discovery in URL Datasets
 Version: 0.1.0
 Authors@R: 
     person("Marek", "Prokop", , "mprokop@prokopsw.cz", role = c("aut", "cre"))
-Description: urlexplorer offers tools for parsing and analyzing URL datasets,
+Description: Offers tools for parsing and analyzing URL datasets,
     extracting key components and identifying common patterns. It aids in 
     examining website architecture and identifying SEO issues, helping users
     optimize web presence and content strategy.

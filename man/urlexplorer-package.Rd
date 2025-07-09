@@ -6,7 +6,7 @@
 \alias{urlexplorer-package}
 \title{urlexplorer: Structural Analysis and Pattern Discovery in URL Datasets}
 \description{
-urlexplorer offers tools for parsing and analyzing URL datasets, extracting key components and identifying common patterns. It aids in examining website architecture and identifying SEO issues, helping users optimize web presence and content strategy.
+Offers tools for parsing and analyzing URL datasets, extracting key components and identifying common patterns. It aids in examining website architecture and identifying SEO issues, helping users optimize web presence and content strategy.
 }
 \seealso{
 Useful links:

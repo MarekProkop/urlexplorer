@@ -16,13 +16,21 @@ knitr::opts_chunk$set(
 # urlexplorer
 
 <!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version/urlexplorer)](https://CRAN.R-project.org/package=urlexplorer)
+[![CRAN downloads](https://cranlogs.r-pkg.org/badges/urlexplorer)](https://cran.r-project.org/package=urlexplorer)
 <!-- badges: end -->
 
 The goal of urlexplorer is to assist you with structural analysis and pattern discovery within datasets of URLs. It provides tools for parsing URLs into their constituent components and analyzing these components to uncover insights into web site architecture and search engine optimizations (SEO).
 
 ## Installation
 
-You can install the development version of urlexplorer from [GitHub](https://github.com/) with:
+You can install urlexplorer from [CRAN](https://cran.r-project.org/package=urlexplorer) with:
+
+``` r
+install.packages("urlexplorer")
+```
+
+You can also install the development version from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
